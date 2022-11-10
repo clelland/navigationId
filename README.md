@@ -13,13 +13,29 @@ Initially, this navigation id would be set when a page is loaded, and it would b
 
 * The page is restored from the back-forward cache
     * This is accompanied by a `BackForwardCacheRestoration` `PerformanceEntry`
-* An SPA navigation is detected
+* An SPA navigation is detected[^3]
     * This is accompanied by a `SoftNavigation` `PerformanceEntry`
 
 Other transitions may need to be added to this set in the future, but this is the inital propsal.
 
+#### Proposed IDL Changes
 
+This would require a change to the [PerformanceEntry interface](https://w3c.github.io/performance-timeline/#dom-performanceentry), adding a navigationId member:
+
+```webidl
+[Exposed=(Window,Worker)]
+interface PerformanceEntry {
+  readonly    attribute DOMString           name;
+  readonly    attribute DOMString           entryType;
+  readonly    attribute DOMHighResTimeStamp startTime;
+  readonly    attribute DOMHighResTimeStamp duration;
+  readonly    attribute unsigned long       navigationId;
+  [Default] object toJSON();
+};
+```
 
 [^1]: This subjectivity is the reason that the Cumulative Layout Shift metric, for instance, differentiates between expected and unexpected layout shifts(https://web.dev/cls/#expected-vs-unexpected-layout-shifts), exempting shifts which occur when the user will legitimately expect some content on the page to change. Similarly, the Largest Contentful Paint metric currently excludes paints which happen after the user interacts with the page, with the idea that paint delays after that point are less critical than those which delay the initial user understanding of the page.
 
 [^2]: In the limit, a simple incrementing counter could work, but maybe an opaque UUID is better?
+
+[^3]: SPA navigations would be governed by [heuristics](https://github.com/yoavweiss/soft-navigations/), but these should be well defined and predictable to developers.
